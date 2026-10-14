@@ -1,128 +1,918 @@
 package GUI;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import java.sql.Connection;
-import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
+import java.text.SimpleDateFormat;
+
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableModel;
 
-public class MyRequestsFrame extends JFrame implements ActionListener {
+import Database.DBConnection;
+
+public class MyRequestsFrame extends JFrame
+        implements ActionListener {
 
     JLabel titleLabel;
-    JLabel eventLabel;
-    JLabel resourceLabel;
-    JLabel dateLabel;
-    JLabel timeLabel;
-    JLabel statusLabel;
+    JLabel detailsTitle;
 
+    JTable requestsTable;
+    DefaultTableModel tableModel;
+
+    JTextArea detailsArea;
+
+    JButton refreshButton;
     JButton backButton;
 
     public MyRequestsFrame() {
 
-        setTitle("My Requests");
-        setSize(550, 450);
-        setLayout(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setTitle(
+                "My Resource Requests - Karunya Campus Allocation & Booking System"
+        );
+
+        setSize(1000, 700);
+
+        setDefaultCloseOperation(
+                JFrame.EXIT_ON_CLOSE
+        );
+
         setLocationRelativeTo(null);
 
-        titleLabel = new JLabel("My Resource Requests");
-        titleLabel.setBounds(190, 30, 200, 30);
+        setLayout(
+                new BorderLayout(
+                        15,
+                        15
+                )
+        );
 
-        eventLabel = new JLabel("Event: Project Review");
-        eventLabel.setBounds(120, 100, 300, 25);
+        JPanel topPanel =
+                new JPanel(
+                        new BorderLayout()
+                );
 
-        resourceLabel = new JLabel("Resource: Seminar Hall A");
-        resourceLabel.setBounds(120, 140, 300, 25);
+        titleLabel =
+                new JLabel(
+                        "My Resource Requests",
+                        SwingConstants.CENTER
+                );
 
-        dateLabel = new JLabel("Date: 22/09/2026");
-        dateLabel.setBounds(120, 180, 300, 25);
+        titleLabel.setFont(
+                new Font(
+                        "Arial",
+                        Font.BOLD,
+                        20
+                )
+        );
 
-        timeLabel = new JLabel("Time: 2:00 PM - 4:00 PM");
-        timeLabel.setBounds(120, 220, 300, 25);
+        topPanel.add(
+                titleLabel,
+                BorderLayout.CENTER
+        );
 
-        statusLabel = new JLabel("Status: Checking...");
-        statusLabel.setBounds(120, 260, 300, 25);
+        refreshButton =
+                new JButton("Refresh");
 
-        backButton = new JButton("Back");
-        backButton.setBounds(220, 320, 100, 35);
+        refreshButton.addActionListener(this);
+
+        JPanel refreshPanel =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.RIGHT
+                        )
+                );
+
+        refreshPanel.add(
+                refreshButton
+        );
+
+        topPanel.add(
+                refreshPanel,
+                BorderLayout.EAST
+        );
+
+        add(
+                topPanel,
+                BorderLayout.NORTH
+        );
+
+        tableModel =
+                new DefaultTableModel(
+                        new String[] {
+                                "Request",
+                                "Event",
+                                "Type",
+                                "Programme",
+                                "Year",
+                                "Section",
+                                "Date",
+                                "Time",
+                                "Resource",
+                                "Status"
+                        },
+                        0
+                ) {
+
+                    @Override
+                    public boolean isCellEditable(
+                            int row,
+                            int column
+                    ) {
+                        return false;
+                    }
+                };
+
+        requestsTable =
+                new JTable(
+                        tableModel
+                );
+
+        requestsTable.setSelectionMode(
+                ListSelectionModel.SINGLE_SELECTION
+        );
+
+        requestsTable.setRowHeight(
+                28
+        );
+
+        requestsTable.setAutoCreateRowSorter(
+                true
+        );
+
+        requestsTable.setToolTipText(
+                "Select a request to view its complete details."
+        );
+
+        requestsTable
+                .getSelectionModel()
+                .addListSelectionListener(
+                        e -> showSelectedRequest()
+                );
+
+        JScrollPane tableScrollPane =
+                new JScrollPane(
+                        requestsTable
+                );
+
+        JPanel tablePanel =
+                new JPanel(
+                        new BorderLayout()
+                );
+
+        tablePanel.setBorder(
+                BorderFactory.createTitledBorder(
+                        "Booking Requests"
+                )
+        );
+
+        tablePanel.add(
+                tableScrollPane,
+                BorderLayout.CENTER
+        );
+
+        detailsTitle =
+                new JLabel(
+                        "Selected Request Details"
+                );
+
+        detailsTitle.setFont(
+                new Font(
+                        "Arial",
+                        Font.BOLD,
+                        15
+                )
+        );
+
+        detailsArea =
+                new JTextArea();
+
+        detailsArea.setEditable(
+                false
+        );
+
+        detailsArea.setLineWrap(
+                true
+        );
+
+        detailsArea.setWrapStyleWord(
+                true
+        );
+
+        detailsArea.setMargin(
+                new Insets(
+                        10,
+                        10,
+                        10,
+                        10
+                )
+        );
+
+        detailsArea.setText(
+                "Select a request from the table to view its details."
+        );
+
+        JScrollPane detailsScrollPane =
+                new JScrollPane(
+                        detailsArea
+                );
+
+        detailsScrollPane.setPreferredSize(
+                new Dimension(
+                        300,
+                        200
+                )
+        );
+
+        JPanel detailsPanel =
+                new JPanel(
+                        new BorderLayout(
+                                5,
+                                5
+                )
+        );
+
+        detailsPanel.setBorder(
+                BorderFactory.createTitledBorder(
+                        "Request Details"
+                )
+        );
+
+        detailsPanel.add(
+                detailsTitle,
+                BorderLayout.NORTH
+        );
+
+        detailsPanel.add(
+                detailsScrollPane,
+                BorderLayout.CENTER
+        );
+
+        JPanel centerPanel =
+                new JPanel(
+                        new GridLayout(
+                                2,
+                                1,
+                                10,
+                                10
+                        )
+                );
+
+        centerPanel.add(
+                tablePanel
+        );
+
+        centerPanel.add(
+                detailsPanel
+        );
+
+        add(
+                centerPanel,
+                BorderLayout.CENTER
+        );
+
+        backButton =
+                new JButton("Back");
 
         backButton.addActionListener(this);
 
-        add(titleLabel);
-        add(eventLabel);
-        add(resourceLabel);
-        add(dateLabel);
-        add(timeLabel);
-        add(statusLabel);
-        add(backButton);
+        JPanel bottomPanel =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.CENTER
+                        )
+                );
 
-        loadStatus();
+        bottomPanel.add(
+                backButton
+        );
+
+        add(
+                bottomPanel,
+                BorderLayout.SOUTH
+        );
+
+        loadRequests();
 
         setVisible(true);
     }
 
-    public void loadStatus() {
+    public void loadRequests() {
 
-        try {
+        tableModel.setRowCount(0);
 
-            Class.forName("com.mysql.cj.jdbc.Driver");
+        int facultyId =
+                LoginFrame.currentUserId;
 
-            Connection con = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/campus_resource_db",
-                    "root",
-                    "YOUR_MYSQL_PASSWORD"
+        if (facultyId == 0) {
+
+            detailsArea.setText(
+                    "No faculty user is logged in."
             );
 
-            Statement stmt = con.createStatement();
+            return;
+        }
 
-            String sql = "SELECT status FROM bookings WHERE booking_id = 1";
+        String sql =
+                "SELECT "
+                + "b.booking_id, "
+                + "e.event_name, "
+                + "e.event_type, "
+                + "d.department_name, "
+                + "p.programme_name, "
+                + "s.year, "
+                + "s.section_name, "
+                + "e.student_count, "
+                + "e.event_date, "
+                + "e.start_time, "
+                + "e.end_time, "
+                + "r.resource_name, "
+                + "b.status, "
+                + "e.faculty_comments "
+                + "FROM bookings b "
+                + "JOIN events e "
+                + "ON b.event_id = e.event_id "
+                + "JOIN resources r "
+                + "ON b.resource_id = r.resource_id "
+                + "LEFT JOIN departments d "
+                + "ON e.department_id = d.department_id "
+                + "LEFT JOIN programmes p "
+                + "ON e.programme_id = p.programme_id "
+                + "LEFT JOIN sections s "
+                + "ON e.section_id = s.section_id "
+                + "WHERE e.faculty_id = ? "
+                + "ORDER BY b.booking_id DESC";
 
-            ResultSet rs = stmt.executeQuery(sql);
+        try (
+                Connection con =
+                        DBConnection.getConnection();
 
-            if (rs.next()) {
+                PreparedStatement pst =
+                        con.prepareStatement(sql)
+        ) {
 
-                String status = rs.getString("status");
+            pst.setInt(
+                    1,
+                    facultyId
+            );
 
-                statusLabel.setText("Status: " + status);
+            try (
+                    ResultSet rs =
+                            pst.executeQuery()
+            ) {
+
+                SimpleDateFormat dateFormat =
+                        new SimpleDateFormat(
+                                "dd/MM/yyyy"
+                        );
+
+                SimpleDateFormat timeFormat =
+                        new SimpleDateFormat(
+                                "hh:mm a"
+                        );
+
+                while (rs.next()) {
+
+                    int bookingId =
+                            rs.getInt(
+                                    "booking_id"
+                            );
+
+                    String eventName =
+                            rs.getString(
+                                    "event_name"
+                            );
+
+                    String eventType =
+                            rs.getString(
+                                    "event_type"
+                            );
+
+                    String programme =
+                            rs.getString(
+                                    "programme_name"
+                            );
+
+                    String year =
+                            rs.getString(
+                                    "year"
+                            );
+
+                    String section =
+                            rs.getString(
+                                    "section_name"
+                            );
+
+                    String date =
+                            formatDate(
+                                    rs.getDate(
+                                            "event_date"
+                                    ),
+                                    dateFormat
+                            );
+
+                    String time =
+                            formatTimeRange(
+                                    rs.getTime(
+                                            "start_time"
+                                    ),
+                                    rs.getTime(
+                                            "end_time"
+                                    ),
+                                    timeFormat
+                            );
+
+                    String resource =
+                            rs.getString(
+                                    "resource_name"
+                            );
+
+                    String status =
+                            rs.getString(
+                                    "status"
+                            );
+
+                    String department =
+                            rs.getString(
+                                    "department_name"
+                            );
+
+                    int studentCount =
+                            rs.getInt(
+                                    "student_count"
+                            );
+
+                    tableModel.addRow(
+                            new Object[] {
+                                    bookingId,
+                                    eventName,
+                                    eventType,
+                                    programme,
+                                    year,
+                                    section,
+                                    date,
+                                    time,
+                                    resource,
+                                    status
+                            }
+                    );
+                }
             }
 
-            con.close();
+            if (
+                    tableModel.getRowCount()
+                            == 0
+            ) {
 
-        } catch (ClassNotFoundException e) {
+                detailsArea.setText(
+                        "You have no resource requests."
+                );
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "JDBC Driver Not Found!"
-            );
+            } else {
+
+                detailsArea.setText(
+                        "Select a request from the table to view its details."
+                );
+            }
 
         } catch (SQLException e) {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Database Error!"
+                    "Database Error: "
+                    + e.getMessage()
             );
 
             e.printStackTrace();
         }
     }
 
-    public void actionPerformed(ActionEvent e) {
+    public void showSelectedRequest() {
 
-        if (e.getSource() == backButton) {
+        int selectedRow =
+                requestsTable.getSelectedRow();
+
+        if (selectedRow == -1) {
+
+            return;
+        }
+
+        int modelRow =
+                requestsTable.convertRowIndexToModel(
+                        selectedRow
+                );
+
+        int bookingId =
+                Integer.parseInt(
+                        tableModel.getValueAt(
+                                modelRow,
+                                0
+                        ).toString()
+                );
+
+        String sql =
+                "SELECT "
+                + "b.booking_id, "
+                + "e.event_name, "
+                + "e.event_type, "
+                + "d.department_name, "
+                + "p.programme_name, "
+                + "s.year, "
+                + "s.section_name, "
+                + "e.student_count, "
+                + "e.event_date, "
+                + "e.start_time, "
+                + "e.end_time, "
+                + "r.resource_name, "
+                + "r.resource_type, "
+                + "b.status, "
+                + "e.faculty_comments "
+                + "FROM bookings b "
+                + "JOIN events e "
+                + "ON b.event_id = e.event_id "
+                + "JOIN resources r "
+                + "ON b.resource_id = r.resource_id "
+                + "LEFT JOIN departments d "
+                + "ON e.department_id = d.department_id "
+                + "LEFT JOIN programmes p "
+                + "ON e.programme_id = p.programme_id "
+                + "LEFT JOIN sections s "
+                + "ON e.section_id = s.section_id "
+                + "WHERE b.booking_id = ? "
+                + "AND e.faculty_id = ?";
+
+        try (
+                Connection con =
+                        DBConnection.getConnection();
+
+                PreparedStatement pst =
+                        con.prepareStatement(sql)
+        ) {
+
+            pst.setInt(
+                    1,
+                    bookingId
+            );
+
+            pst.setInt(
+                    2,
+                    LoginFrame.currentUserId
+            );
+
+            try (
+                    ResultSet rs =
+                            pst.executeQuery()
+            ) {
+
+                if (rs.next()) {
+
+                    SimpleDateFormat dateFormat =
+                            new SimpleDateFormat(
+                                    "dd/MM/yyyy"
+                            );
+
+                    SimpleDateFormat timeFormat =
+                            new SimpleDateFormat(
+                                    "hh:mm a"
+                            );
+
+                    StringBuilder details =
+                            new StringBuilder();
+
+                    details.append(
+                            "Request #"
+                    );
+
+                    details.append(
+                            rs.getInt(
+                                    "booking_id"
+                            )
+                    );
+
+                    details.append(
+                            "\n\n"
+                    );
+
+                    details.append(
+                            "Event: "
+                    );
+
+                    details.append(
+                            rs.getString(
+                                    "event_name"
+                            )
+                    );
+
+                    details.append(
+                            "\n"
+                    );
+
+                    details.append(
+                            "Event Type: "
+                    );
+
+                    details.append(
+                            safeValue(
+                                    rs.getString(
+                                            "event_type"
+                                    )
+                            )
+                    );
+
+                    details.append(
+                            "\n\n"
+                    );
+
+                    details.append(
+                            "Academic Group\n"
+                    );
+
+                    details.append(
+                            "Department: "
+                    );
+
+                    details.append(
+                            safeValue(
+                                    rs.getString(
+                                            "department_name"
+                                    )
+                            )
+                    );
+
+                    details.append(
+                            "\nProgramme: "
+                    );
+
+                    details.append(
+                            safeValue(
+                                    rs.getString(
+                                            "programme_name"
+                                    )
+                            )
+                    );
+
+                    details.append(
+                            "\nYear: "
+                    );
+
+                    details.append(
+                            safeValue(
+                                    rs.getString(
+                                            "year"
+                                    )
+                            )
+                    );
+
+                    details.append(
+                            "\nSection: "
+                    );
+
+                    details.append(
+                            safeValue(
+                                    rs.getString(
+                                            "section_name"
+                                    )
+                            )
+                    );
+
+                    details.append(
+                            "\nStudents: "
+                    );
+
+                    details.append(
+                            rs.getInt(
+                                    "student_count"
+                            )
+                    );
+
+                    details.append(
+                            "\n\n"
+                    );
+
+                    details.append(
+                            "Schedule\n"
+                    );
+
+                    details.append(
+                            "Date: "
+                    );
+
+                    details.append(
+                            formatDate(
+                                    rs.getDate(
+                                            "event_date"
+                                    ),
+                                    dateFormat
+                            )
+                    );
+
+                    details.append(
+                            "\nTime: "
+                    );
+
+                    details.append(
+                            formatTimeRange(
+                                    rs.getTime(
+                                            "start_time"
+                                    ),
+                                    rs.getTime(
+                                            "end_time"
+                                    ),
+                                    timeFormat
+                            )
+                    );
+
+                    details.append(
+                            "\n\n"
+                    );
+
+                    details.append(
+                            "Resource\n"
+                    );
+
+                    details.append(
+                            "Type: "
+                    );
+
+                    details.append(
+                            safeValue(
+                                    rs.getString(
+                                            "resource_type"
+                                    )
+                            )
+                    );
+
+                    details.append(
+                            "\nAllocated Resource: "
+                    );
+
+                    details.append(
+                            safeValue(
+                                    rs.getString(
+                                            "resource_name"
+                                    )
+                            )
+                    );
+
+                    details.append(
+                            "\n\n"
+                    );
+
+                    details.append(
+                            "Status: "
+                    );
+
+                    details.append(
+                            rs.getString(
+                                    "status"
+                            )
+                    );
+
+                    details.append(
+                            "\n\n"
+                    );
+
+                    details.append(
+                            "Faculty Note\n"
+                    );
+
+                    String comments =
+                            rs.getString(
+                                    "faculty_comments"
+                            );
+
+                    if (
+                            comments == null
+                                    || comments
+                                    .trim()
+                                    .isEmpty()
+                    ) {
+
+                        details.append(
+                                "No additional note provided."
+                        );
+
+                    } else {
+
+                        details.append(
+                                comments
+                        );
+                    }
+
+                    detailsArea.setText(
+                            details.toString()
+                    );
+
+                    detailsArea.setCaretPosition(
+                            0
+                    );
+                }
+            }
+
+        } catch (SQLException e) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Could not load request details: "
+                    + e.getMessage()
+            );
+
+            e.printStackTrace();
+        }
+    }
+
+    private String safeValue(
+            String value
+    ) {
+
+        if (
+                value == null
+                        || value.trim().isEmpty()
+        ) {
+
+            return "Not available";
+        }
+
+        return value;
+    }
+
+    private String formatDate(
+            java.sql.Date date,
+            SimpleDateFormat format
+    ) {
+
+        if (date == null) {
+
+            return "Not available";
+        }
+
+        return format.format(date);
+    }
+
+    private String formatTimeRange(
+            java.sql.Time startTime,
+            java.sql.Time endTime,
+            SimpleDateFormat format
+    ) {
+
+        if (
+                startTime == null
+                        || endTime == null
+        ) {
+
+            return "Not available";
+        }
+
+        return format.format(startTime)
+                + " - "
+                + format.format(endTime);
+    }
+
+    @Override
+    public void actionPerformed(
+            ActionEvent e
+    ) {
+
+        if (
+                e.getSource()
+                        == refreshButton
+        ) {
+
+            loadRequests();
+
+        } else if (
+                e.getSource()
+                        == backButton
+        ) {
 
             dispose();
+
             new FacultyFrame();
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(
+            String[] args
+    ) {
 
         new MyRequestsFrame();
     }

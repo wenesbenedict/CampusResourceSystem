@@ -10,42 +10,47 @@ import javax.swing.JLabel;
 public class FacultyFrame extends JFrame implements ActionListener {
 
     JLabel titleLabel;
+
     JButton createEventButton;
-    JButton requestResourceButton;
+    JButton studentRequestsButton;
     JButton myRequestsButton;
     JButton logoutButton;
 
     public FacultyFrame() {
 
         setTitle("Faculty Dashboard");
-        setSize(500, 400);
+        setSize(500, 420);
         setLayout(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
         titleLabel = new JLabel("Faculty Dashboard");
-        titleLabel.setBounds(180, 40, 200, 30);
+        titleLabel.setBounds(180, 30, 200, 30);
 
-        createEventButton = new JButton("Create Event");
-        createEventButton.setBounds(150, 100, 200, 40);
+        createEventButton =
+                new JButton("Create Event & Request Resource");
+        createEventButton.setBounds(100, 90, 300, 40);
 
-        requestResourceButton = new JButton("Request Resource");
-        requestResourceButton.setBounds(150, 155, 200, 40);
+        studentRequestsButton =
+                new JButton("Student Account Requests");
+        studentRequestsButton.setBounds(150, 145, 200, 40);
 
-        myRequestsButton = new JButton("My Requests");
-        myRequestsButton.setBounds(150, 210, 200, 40);
+        myRequestsButton =
+                new JButton("My Resource Requests");
+        myRequestsButton.setBounds(150, 200, 200, 40);
 
-        logoutButton = new JButton("Logout");
-        logoutButton.setBounds(150, 265, 200, 40);
+        logoutButton =
+                new JButton("Logout");
+        logoutButton.setBounds(150, 270, 200, 40);
 
         createEventButton.addActionListener(this);
-        requestResourceButton.addActionListener(this);
+        studentRequestsButton.addActionListener(this);
         myRequestsButton.addActionListener(this);
         logoutButton.addActionListener(this);
 
         add(titleLabel);
         add(createEventButton);
-        add(requestResourceButton);
+        add(studentRequestsButton);
         add(myRequestsButton);
         add(logoutButton);
 
@@ -54,23 +59,25 @@ public class FacultyFrame extends JFrame implements ActionListener {
 
     public void actionPerformed(ActionEvent e) {
 
-    	if (e.getSource() == createEventButton) {
+        if (e.getSource() == createEventButton) {
 
-    	    dispose();
-    	    new CreateEventFrame();
+            dispose();
+            new CreateEventFrame();
 
-    	} else if (e.getSource() == myRequestsButton) {
+        } else if (e.getSource() == studentRequestsButton) {
 
-    	    dispose();
-    	    new MyRequestsFrame();
+            dispose();
+            new StudentRequestsFrame();
 
-    	}else if (e.getSource() == myRequestsButton) {
+        } else if (e.getSource() == myRequestsButton) {
 
-            System.out.println("My Requests clicked");
+            dispose();
+            new MyRequestsFrame();
 
         } else if (e.getSource() == logoutButton) {
 
             dispose();
+            new LoginFrame();
         }
     }
 
