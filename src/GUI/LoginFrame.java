@@ -299,7 +299,9 @@ public class LoginFrame extends JFrame implements ActionListener {
 
         // Login
         String username =
-                usernameField.getText();
+                usernameField.getText() == null
+                        ? ""
+                        : usernameField.getText().trim();
 
         String password =
                 new String(
@@ -320,93 +322,88 @@ public class LoginFrame extends JFrame implements ActionListener {
             return;
         }
 
-        try {
+        try (
+                Connection con =
+                        DBConnection.getConnection();
 
-            Connection con =
-                    DBConnection.getConnection();
-
-            String sql =
-                    "SELECT user_id, username, role, status "
-                    + "FROM users "
-                    + "WHERE username = ? "
-                    + "AND password = ? "
-                    + "AND role = ?";
-
-            PreparedStatement pst =
-                    con.prepareStatement(sql);
+                PreparedStatement pst =
+                        con.prepareStatement(
+                                "SELECT user_id, username, role, status "
+                                + "FROM users "
+                                + "WHERE username = ? "
+                                + "AND password = ? "
+                                + "AND role = ?"
+                        )
+        ) {
 
             pst.setString(1, username);
             pst.setString(2, password);
             pst.setString(3, role);
 
-            ResultSet rs =
-                    pst.executeQuery();
+            try (ResultSet rs = pst.executeQuery()) {
 
-            if (rs.next()) {
+                if (rs.next()) {
 
-                currentUserId =
-                        rs.getInt("user_id");
+                    currentUserId =
+                            rs.getInt("user_id");
 
-                currentUsername =
-                        rs.getString("username");
+                    currentUsername =
+                            rs.getString("username");
 
-                currentRole =
-                        rs.getString("role");
+                    currentRole =
+                            rs.getString("role");
 
-                String status =
-                        rs.getString("status");
+                    String status =
+                            rs.getString("status");
 
-                con.close();
+                    if ("Pending".equalsIgnoreCase(status)) {
 
-                if (status.equals("Pending")) {
+                        JOptionPane.showMessageDialog(
+                                this,
+                                "Your account is waiting for approval."
+                        );
+
+                        return;
+                    }
+
+                    if ("Rejected".equalsIgnoreCase(status)) {
+
+                        JOptionPane.showMessageDialog(
+                                this,
+                                "Your account has been rejected."
+                        );
+
+                        return;
+                    }
 
                     JOptionPane.showMessageDialog(
                             this,
-                            "Your account is waiting for approval."
+                            currentRole
+                                    + " Login Successful!"
                     );
 
-                    return;
-                }
+                    dispose();
 
-                if (status.equals("Rejected")) {
+                    if ("Faculty".equalsIgnoreCase(currentRole)) {
+
+                        new FacultyFrame();
+
+                    } else if ("Admin".equalsIgnoreCase(currentRole)) {
+
+                        new AdminFrame();
+
+                    } else if ("Student".equalsIgnoreCase(currentRole)) {
+
+                        new StudentFrame();
+                    }
+
+                } else {
 
                     JOptionPane.showMessageDialog(
                             this,
-                            "Your account has been rejected."
+                            "Invalid Login Details!"
                     );
-
-                    return;
                 }
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        currentRole
-                                + " Login Successful!"
-                );
-
-                dispose();
-
-                if (currentRole.equals("Faculty")) {
-
-                    new FacultyFrame();
-
-                } else if (currentRole.equals("Admin")) {
-
-                    new AdminFrame();
-
-                } else if (currentRole.equals("Student")) {
-
-                    new StudentFrame();
-                }
-
-            } else {
-
-                con.close();
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Invalid Login Details!"
-                );
             }
 
         } catch (SQLException ex) {
