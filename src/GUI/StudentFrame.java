@@ -292,6 +292,7 @@ public class StudentFrame extends JFrame implements ActionListener {
                 + "AND st.role = 'Student' "
                 + "AND st.status = 'Approved' "
                 + "AND b.status = 'Approved' "
+    + "AND f.status = 'Approved' "
                 + "ORDER BY e.event_date, e.start_time";
 
         try (
@@ -401,7 +402,8 @@ public class StudentFrame extends JFrame implements ActionListener {
                 + "AND st.role = 'Student' "
                 + "AND st.status = 'Approved' "
                 + "AND e.event_id = ? "
-                + "AND b.status = 'Approved'";
+                + "AND b.status = 'Approved' "
+    + "AND f.status = 'Approved'";
 
         try (
                 Connection con = DBConnection.getConnection();

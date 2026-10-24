@@ -45,13 +45,16 @@ public class AdminFrame extends JFrame implements ActionListener {
     JTable bookingTable;
     JTable facultyTable;
     JTable resourceTable;
+    JTable bookingHistoryTable;
 
     DefaultTableModel bookingModel;
     DefaultTableModel facultyModel;
     DefaultTableModel resourceModel;
+    DefaultTableModel bookingHistoryModel;
 
     JTextArea bookingDetailsArea;
     JTextArea facultyDetailsArea;
+    JTextArea bookingHistoryDetailsArea;
 
     JButton approveBookingButton;
     JButton rejectBookingButton;
@@ -62,6 +65,7 @@ public class AdminFrame extends JFrame implements ActionListener {
     JButton refreshFacultyButton;
 
     JButton refreshResourceButton;
+    JButton refreshHistoryButton;
 
     JButton logoutButton;
 
@@ -95,6 +99,7 @@ public class AdminFrame extends JFrame implements ActionListener {
         loadBookingRequests();
         loadFacultyRequests();
         loadResources();
+        loadBookingHistory();
 
         setVisible(true);
     }
@@ -223,6 +228,7 @@ public class AdminFrame extends JFrame implements ActionListener {
                 new JTabbedPane();
 
         createBookingTab();
+        createBookingHistoryTab();
 
         createFacultyTab();
 
@@ -724,6 +730,67 @@ public class AdminFrame extends JFrame implements ActionListener {
         );
     }
 
+    private void createBookingHistoryTab() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+
+        bookingHistoryModel = new DefaultTableModel(
+                new String[] {
+                        "Request",
+                        "Event",
+                        "Faculty",
+                        "Department",
+                        "Programme",
+                        "Year",
+                        "Section",
+                        "Date",
+                        "Time",
+                        "Resource",
+                        "Status"
+                },
+                0
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        bookingHistoryTable = new JTable(bookingHistoryModel);
+        bookingHistoryTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        bookingHistoryTable.setRowHeight(28);
+        bookingHistoryTable.setAutoCreateRowSorter(true);
+        bookingHistoryTable.getSelectionModel().addListSelectionListener(e -> showBookingHistoryDetails());
+
+        JScrollPane tableScrollPane = new JScrollPane(bookingHistoryTable);
+
+        JPanel detailsPanel = new JPanel(new BorderLayout());
+        detailsPanel.setBorder(BorderFactory.createTitledBorder("Selected Booking Details"));
+
+        bookingHistoryDetailsArea = new JTextArea();
+        bookingHistoryDetailsArea.setEditable(false);
+        bookingHistoryDetailsArea.setLineWrap(true);
+        bookingHistoryDetailsArea.setWrapStyleWord(true);
+        bookingHistoryDetailsArea.setMargin(new Insets(10, 10, 10, 10));
+        bookingHistoryDetailsArea.setText("Select a booking from the history to view complete details.");
+
+        detailsPanel.add(new JScrollPane(bookingHistoryDetailsArea), BorderLayout.CENTER);
+        detailsPanel.setPreferredSize(new Dimension(1000, 220));
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 8));
+        refreshHistoryButton = new JButton("Refresh");
+        refreshHistoryButton.addActionListener(this);
+        buttonPanel.add(refreshHistoryButton);
+
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.add(detailsPanel, BorderLayout.CENTER);
+        bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        panel.add(tableScrollPane, BorderLayout.CENTER);
+        panel.add(bottomPanel, BorderLayout.SOUTH);
+
+        tabbedPane.addTab("Booking History", panel);
+    }
+
     private void createFooter() {
 
         logoutButton =
@@ -891,6 +958,70 @@ public class AdminFrame extends JFrame implements ActionListener {
                     + e.getMessage()
             );
 
+            e.printStackTrace();
+        }
+    }
+
+    public void loadBookingHistory() {
+        bookingHistoryModel.setRowCount(0);
+
+        String sql = "SELECT "
+                + "b.booking_id, "
+                + "e.event_name, "
+                + "e.event_type, "
+                + "u.name AS faculty_name, "
+                + "d.department_name, "
+                + "p.programme_name, "
+                + "s.year, "
+                + "s.section_name, "
+                + "e.event_date, "
+                + "e.start_time, "
+                + "e.end_time, "
+                + "r.resource_name, "
+                + "b.status "
+                + "FROM bookings b "
+                + "JOIN events e ON b.event_id = e.event_id "
+                + "JOIN users u ON e.faculty_id = u.user_id "
+                + "LEFT JOIN departments d ON e.department_id = d.department_id "
+                + "LEFT JOIN programmes p ON e.programme_id = p.programme_id "
+                + "LEFT JOIN sections s ON e.section_id = s.section_id "
+                + "JOIN resources r ON b.resource_id = r.resource_id "
+                + "WHERE b.status IN ('Approved', 'Rejected') "
+                + "ORDER BY b.booking_id DESC";
+
+        try (
+                Connection con = DBConnection.getConnection();
+                PreparedStatement pst = con.prepareStatement(sql);
+                ResultSet rs = pst.executeQuery()
+        ) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+            SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a");
+
+            while (rs.next()) {
+                bookingHistoryModel.addRow(new Object[] {
+                        rs.getInt("booking_id"),
+                        rs.getString("event_name"),
+                        rs.getString("event_type"),
+                        rs.getString("faculty_name"),
+                        safeValue(rs.getString("department_name")),
+                        safeValue(rs.getString("programme_name")),
+                        safeValue(rs.getString("year")),
+                        safeValue(rs.getString("section_name")),
+                        dateFormat.format(rs.getDate("event_date")),
+                        timeFormat.format(rs.getTime("start_time")) + " - " + timeFormat.format(rs.getTime("end_time")),
+                        rs.getString("resource_name"),
+                        rs.getString("status")
+                });
+            }
+
+            if (bookingHistoryModel.getRowCount() == 0) {
+                bookingHistoryDetailsArea.setText("No booking history records found.");
+            } else {
+                bookingHistoryDetailsArea.setText("Select a booking from the history to view complete details.");
+                bookingHistoryTable.setRowSelectionInterval(0, 0);
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Could not load booking history:\n" + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -1255,6 +1386,107 @@ public class AdminFrame extends JFrame implements ActionListener {
                     + e.getMessage()
             );
 
+            e.printStackTrace();
+        }
+    }
+
+    private void showBookingHistoryDetails() {
+        int selectedRow = bookingHistoryTable.getSelectedRow();
+
+        if (selectedRow == -1) {
+            return;
+        }
+
+        int modelRow = bookingHistoryTable.convertRowIndexToModel(selectedRow);
+        int bookingId = Integer.parseInt(bookingHistoryModel.getValueAt(modelRow, 0).toString());
+
+        String sql = "SELECT "
+                + "b.booking_id, "
+                + "e.event_name, "
+                + "e.event_type, "
+                + "u.name AS faculty_name, "
+                + "u.email, "
+                + "d.department_name, "
+                + "p.programme_name, "
+                + "s.year, "
+                + "s.section_name, "
+                + "e.student_count, "
+                + "e.event_date, "
+                + "e.start_time, "
+                + "e.end_time, "
+                + "r.resource_name, "
+                + "r.resource_type, "
+                + "r.capacity, "
+                + "r.projector, "
+                + "b.status, "
+                + "e.faculty_comments "
+                + "FROM bookings b "
+                + "JOIN events e ON b.event_id = e.event_id "
+                + "JOIN users u ON e.faculty_id = u.user_id "
+                + "LEFT JOIN departments d ON e.department_id = d.department_id "
+                + "LEFT JOIN programmes p ON e.programme_id = p.programme_id "
+                + "LEFT JOIN sections s ON e.section_id = s.section_id "
+                + "JOIN resources r ON b.resource_id = r.resource_id "
+                + "WHERE b.booking_id = ?";
+
+        try (
+                Connection con = DBConnection.getConnection();
+                PreparedStatement pst = con.prepareStatement(sql)
+        ) {
+            pst.setInt(1, bookingId);
+
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+                    SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a");
+
+                    StringBuilder details = new StringBuilder();
+
+                    details.append("Request #").append(rs.getInt("booking_id"));
+
+                    details.append("\n\nEvent\n");
+                    details.append(rs.getString("event_name"));
+                    details.append("\n");
+                    details.append("Type: ").append(safeValue(rs.getString("event_type")));
+
+                    details.append("\n\nFaculty\n");
+                    details.append(rs.getString("faculty_name"));
+                    details.append("\nEmail: ").append(safeValue(rs.getString("email")));
+
+                    details.append("\n\nAcademic Group\n");
+                    details.append("Department: ").append(safeValue(rs.getString("department_name")));
+                    details.append("\nProgramme: ").append(safeValue(rs.getString("programme_name") == null ? "Department-wide" : rs.getString("programme_name")));
+                    details.append("\nYear: ").append(safeValue(rs.getString("year") == null ? "All Years" : rs.getString("year")));
+                    details.append("\nSection: ").append(safeValue(rs.getString("section_name") == null ? "All Sections" : rs.getString("section_name")));
+                    details.append("\nStudents: ").append(rs.getInt("student_count"));
+
+                    details.append("\n\nSchedule\n");
+                    details.append("Date: ").append(dateFormat.format(rs.getDate("event_date")));
+                    details.append("\nTime: ").append(timeFormat.format(rs.getTime("start_time")))
+                            .append(" - ").append(timeFormat.format(rs.getTime("end_time")));
+
+                    details.append("\n\nResource\n");
+                    details.append("Requested Type: ").append(rs.getString("resource_type"));
+                    details.append("\nAllocated Resource: ").append(rs.getString("resource_name"));
+                    details.append("\nCapacity: ").append(rs.getObject("capacity") == null ? "Not specified" : rs.getInt("capacity"));
+                    details.append("\nProjector: ").append(safeValue(rs.getString("projector")));
+
+                    details.append("\n\nFaculty Note\n");
+                    String comment = rs.getString("faculty_comments");
+                    if (comment == null || comment.trim().isEmpty()) {
+                        details.append("No additional note provided.");
+                    } else {
+                        details.append(comment);
+                    }
+
+                    details.append("\n\nStatus: ").append(rs.getString("status"));
+
+                    bookingHistoryDetailsArea.setText(details.toString());
+                    bookingHistoryDetailsArea.setCaretPosition(0);
+                }
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Could not load booking history details:\n" + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -1923,7 +2155,11 @@ public class AdminFrame extends JFrame implements ActionListener {
         ) {
 
             loadResources();
-
+        } else if (
+                e.getSource()
+                        == refreshHistoryButton
+        ) {
+            loadBookingHistory();
         } else if (
                 e.getSource()
                         == logoutButton
