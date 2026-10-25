@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
@@ -17,6 +18,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
@@ -42,7 +44,7 @@ public class LoginFrame extends JFrame implements ActionListener {
     public LoginFrame() {
 
         setTitle("Campus Resource Allocation & Booking System");
-        setSize(600, 450);
+        setSize(600, 480);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         getContentPane().setBackground(new Color(245, 247, 250));
@@ -64,13 +66,14 @@ public class LoginFrame extends JFrame implements ActionListener {
                 new Font("Arial", Font.BOLD, 20)
         );
         titleLabel.setForeground(new Color(35, 55, 80));
+        JLabel logoLabel = createLogoLabel(270);
 
         JPanel titlePanel =
-                new JPanel(new BorderLayout());
+                new JPanel(new BorderLayout(0, 8));
 
         titlePanel.setBorder(
                 BorderFactory.createEmptyBorder(
-                        25, 20, 15, 20
+                        15, 20, 10, 20
                 )
         );
 
@@ -78,6 +81,7 @@ public class LoginFrame extends JFrame implements ActionListener {
                 titleLabel,
                 BorderLayout.CENTER
         );
+        titlePanel.add(logoLabel, BorderLayout.NORTH);
         titlePanel.setOpaque(false);
 
         // ==========================================
@@ -268,7 +272,7 @@ public class LoginFrame extends JFrame implements ActionListener {
                         new FlowLayout(
                                 FlowLayout.CENTER,
                                 0,
-                                20
+                                12
                         )
                 );
 
@@ -289,6 +293,23 @@ public class LoginFrame extends JFrame implements ActionListener {
         );
 
         setVisible(true);
+    }
+
+    private JLabel createLogoLabel(int targetWidth) {
+        java.net.URL logoUrl = getClass().getResource("/images/karunya.png");
+        if (logoUrl == null) {
+            return new JLabel();
+        }
+        ImageIcon icon = new ImageIcon(logoUrl);
+        int origWidth = icon.getIconWidth();
+        int origHeight = icon.getIconHeight();
+        int targetHeight = origWidth > 0
+                ? (int) Math.round((double) origHeight * targetWidth / origWidth)
+                : targetWidth;
+        Image image = icon.getImage().getScaledInstance(
+                targetWidth, targetHeight, Image.SCALE_SMOOTH);
+
+        return new JLabel(new ImageIcon(image), SwingConstants.CENTER);
     }
 
     // ==========================================

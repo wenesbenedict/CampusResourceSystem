@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,6 +17,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -72,6 +74,10 @@ public class StudentRequestsFrame extends JFrame implements ActionListener {
         );
         titleLabel.setFont(new Font("Arial", Font.BOLD, 21));
         titleLabel.setForeground(new Color(35, 55, 80));
+        JPanel titlePanel = new JPanel(new BorderLayout(10, 0));
+        titlePanel.setOpaque(false);
+        titlePanel.add(createLogoLabel(60), BorderLayout.WEST);
+        titlePanel.add(titleLabel, BorderLayout.CENTER);
 
         countLabel = new JLabel(
                 "Pending Student Accounts: 0",
@@ -79,10 +85,20 @@ public class StudentRequestsFrame extends JFrame implements ActionListener {
         );
         countLabel.setFont(new Font("Arial", Font.BOLD, 14));
 
-        headerPanel.add(titleLabel, BorderLayout.NORTH);
+        headerPanel.add(titlePanel, BorderLayout.NORTH);
         headerPanel.add(countLabel, BorderLayout.SOUTH);
 
         add(headerPanel, BorderLayout.NORTH);
+    }
+
+    private JLabel createLogoLabel(int size) {
+        java.net.URL logoUrl = getClass().getResource("/images/karunya_logo.png");
+        if (logoUrl == null) {
+            return new JLabel();
+        }
+        Image image = new ImageIcon(logoUrl).getImage().getScaledInstance(
+                size, size, Image.SCALE_SMOOTH);
+        return new JLabel(new ImageIcon(image));
     }
 
     private void createStudentTable() {

@@ -6,12 +6,14 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 public class FacultyFrame extends JFrame implements ActionListener {
@@ -35,6 +37,10 @@ public class FacultyFrame extends JFrame implements ActionListener {
         titleLabel.setHorizontalAlignment(JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 22));
         titleLabel.setForeground(new Color(35, 55, 80));
+        JPanel titlePanel = new JPanel(new BorderLayout(10, 0));
+        titlePanel.setOpaque(false);
+        titlePanel.add(createLogoLabel(64), BorderLayout.WEST);
+        titlePanel.add(titleLabel, BorderLayout.CENTER);
 
         createEventButton =
                 new JButton("Create Event & Request Resource");
@@ -66,10 +72,20 @@ public class FacultyFrame extends JFrame implements ActionListener {
         buttonPanel.add(studentRequestsButton);
         buttonPanel.add(myRequestsButton);
         buttonPanel.add(logoutButton);
-        add(titleLabel, BorderLayout.NORTH);
+        add(titlePanel, BorderLayout.NORTH);
         add(buttonPanel, BorderLayout.CENTER);
 
         setVisible(true);
+    }
+
+    private JLabel createLogoLabel(int size) {
+        java.net.URL logoUrl = getClass().getResource("/images/karunya_logo.png");
+        if (logoUrl == null) {
+            return new JLabel();
+        }
+        Image image = new ImageIcon(logoUrl).getImage().getScaledInstance(
+                size, size, Image.SCALE_SMOOTH);
+        return new JLabel(new ImageIcon(image));
     }
 
     public void actionPerformed(ActionEvent e) {

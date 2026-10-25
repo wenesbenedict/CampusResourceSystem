@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -22,6 +23,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
@@ -135,9 +137,13 @@ public class SignUpFrame extends JFrame
                 )
         );
         titleLabel.setForeground(new Color(35, 55, 80));
+        JPanel titleArea = new JPanel(new BorderLayout(10, 0));
+        titleArea.setOpaque(false);
+        titleArea.add(createLogoLabel(76), BorderLayout.WEST);
+        titleArea.add(titleLabel, BorderLayout.CENTER);
 
         mainPanel.add(
-                titleLabel,
+                titleArea,
                 BorderLayout.NORTH
         );
 
@@ -402,6 +408,16 @@ public class SignUpFrame extends JFrame
         );
 
         add(mainPanel);
+    }
+
+    private JLabel createLogoLabel(int size) {
+        java.net.URL logoUrl = getClass().getResource("/images/karunya_logo.png");
+        if (logoUrl == null) {
+            return new JLabel();
+        }
+        Image image = new ImageIcon(logoUrl).getImage().getScaledInstance(
+                size, size, Image.SCALE_SMOOTH);
+        return new JLabel(new ImageIcon(image));
     }
 
     private void addRow(

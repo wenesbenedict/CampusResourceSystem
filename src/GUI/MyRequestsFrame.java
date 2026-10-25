@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -21,6 +22,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -87,6 +89,7 @@ public class MyRequestsFrame extends JFrame
                 )
         );
         titleLabel.setForeground(new Color(35, 55, 80));
+        topPanel.add(createLogoLabel(60), BorderLayout.WEST);
 
         topPanel.add(
                 titleLabel,
@@ -329,6 +332,16 @@ public class MyRequestsFrame extends JFrame
         setVisible(true);
     }
 
+    private JLabel createLogoLabel(int size) {
+        java.net.URL logoUrl = getClass().getResource("/images/karunya_logo.png");
+        if (logoUrl == null) {
+            return new JLabel();
+        }
+        Image image = new ImageIcon(logoUrl).getImage().getScaledInstance(
+                size, size, Image.SCALE_SMOOTH);
+        return new JLabel(new ImageIcon(image));
+    }
+
     public void loadRequests() {
 
         tableModel.setRowCount(0);
@@ -478,10 +491,10 @@ public class MyRequestsFrame extends JFrame
                             new Object[] {
                                     bookingId,
                                     eventName,
-                                    eventType,
-                                    programme,
-                                    year,
-                                    section,
+                                    safeValue(eventType),
+                                    safeValue(programme),
+                                    safeValue(year),
+                                    safeValue(section),
                                     date,
                                     time,
                                     resource,

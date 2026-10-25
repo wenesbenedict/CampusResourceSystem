@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
@@ -23,6 +24,7 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -135,6 +137,8 @@ public class CreateEventFrame extends JFrame implements ActionListener {
         titleLabel.setFont(new java.awt.Font(
                 "Arial", java.awt.Font.BOLD, 18));
         titleLabel.setForeground(new Color(35, 55, 80));
+        JLabel logoLabel = createLogoLabel(60);
+        logoLabel.setBounds(35, 5, 60, 60);
 
         eventNameLabel = new JLabel("Event Name:");
         eventNameLabel.setBounds(35, 65, 130, 25);
@@ -319,6 +323,7 @@ public class CreateEventFrame extends JFrame implements ActionListener {
         backButton.setPreferredSize(new Dimension(195, 35));
 
         panel.add(titleLabel);
+        panel.add(logoLabel);
 
         panel.add(eventNameLabel);
         panel.add(eventNameField);
@@ -369,6 +374,16 @@ public class CreateEventFrame extends JFrame implements ActionListener {
 
     private void styleInput(javax.swing.JComponent component) {
         component.setFont(new Font("Arial", Font.PLAIN, 13));
+    }
+
+    private JLabel createLogoLabel(int size) {
+        java.net.URL logoUrl = getClass().getResource("/images/karunya_logo.png");
+        if (logoUrl == null) {
+            return new JLabel();
+        }
+        Image image = new ImageIcon(logoUrl).getImage().getScaledInstance(
+                size, size, Image.SCALE_SMOOTH);
+        return new JLabel(new ImageIcon(image));
     }
 
     private void updateCommentCount() {
