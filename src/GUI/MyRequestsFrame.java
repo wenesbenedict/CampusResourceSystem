@@ -11,6 +11,12 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,6 +27,7 @@ import java.text.SimpleDateFormat;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
@@ -46,6 +53,7 @@ public class MyRequestsFrame extends JFrame
     JTextArea detailsArea;
 
     JButton refreshButton;
+    JButton exportButton;
     JButton backButton;
 
     public MyRequestsFrame() {
@@ -104,6 +112,12 @@ public class MyRequestsFrame extends JFrame
         refreshButton.setBackground(new Color(45, 91, 140));
         refreshButton.setForeground(Color.WHITE);
 
+        exportButton = new JButton("Export to Text");
+        exportButton.addActionListener(this);
+        exportButton.setPreferredSize(new Dimension(125, 34));
+        exportButton.setBackground(new Color(45, 91, 140));
+        exportButton.setForeground(Color.WHITE);
+
         JPanel refreshPanel =
                 new JPanel(
                         new FlowLayout(
@@ -111,9 +125,8 @@ public class MyRequestsFrame extends JFrame
                         )
                 );
 
-        refreshPanel.add(
-                refreshButton
-        );
+        refreshPanel.add(exportButton);
+        refreshPanel.add(refreshButton);
 
         topPanel.add(
                 refreshPanel,
@@ -866,6 +879,86 @@ public class MyRequestsFrame extends JFrame
         }
     }
 
+    private void exportRequestsToText() {
+
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Export My Resource Requests");
+        fileChooser.setSelectedFile(new File("my_resource_requests.txt"));
+
+        int choice = fileChooser.showSaveDialog(this);
+        if (choice != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        File file = fileChooser.getSelectedFile();
+        if (!file.getName().toLowerCase(java.util.Locale.ROOT).endsWith(".txt")) {
+            file = new File(file.getParentFile(), file.getName() + ".txt");
+        }
+
+        if (file.exists()) {
+            int overwrite = JOptionPane.showConfirmDialog(
+                    this,
+                    "This file already exists. Do you want to overwrite it?",
+                    "Confirm Overwrite",
+                    JOptionPane.YES_NO_OPTION
+            );
+            if (overwrite != JOptionPane.YES_OPTION) {
+                return;
+            }
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(
+                new FileWriter(file, StandardCharsets.UTF_8))) {
+
+            for (int column = 0; column < requestsTable.getColumnCount(); column++) {
+                if (column > 0) {
+                    writer.write("\t");
+                }
+                Object header = requestsTable.getColumnModel()
+                        .getColumn(column)
+                        .getHeaderValue();
+                writer.write(exportCellValue(header));
+            }
+            writer.newLine();
+
+            for (int row = 0; row < requestsTable.getRowCount(); row++) {
+                for (int column = 0; column < requestsTable.getColumnCount(); column++) {
+                    if (column > 0) {
+                        writer.write("\t");
+                    }
+                    writer.write(exportCellValue(requestsTable.getValueAt(row, column)));
+                }
+                writer.newLine();
+            }
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Requests exported successfully:\n" + file.getAbsolutePath(),
+                    "Export Complete",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Could not export requests:\n" + ex.getMessage(),
+                    "Export Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    private String exportCellValue(Object value) {
+        if (value == null || value.toString().trim().isEmpty()) {
+            return "Not available";
+        }
+
+        return value.toString()
+                .replace("\t", " ")
+                .replace("\r", " ")
+                .replace("\n", " ");
+    }
+
     private String safeValue(
             String value
     ) {
@@ -918,7 +1011,11 @@ public class MyRequestsFrame extends JFrame
             ActionEvent e
     ) {
 
-        if (
+        if (e.getSource() == exportButton) {
+
+            exportRequestsToText();
+
+        } else if (
                 e.getSource()
                         == refreshButton
         ) {

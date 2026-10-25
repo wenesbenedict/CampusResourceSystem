@@ -26,6 +26,10 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import Database.DBConnection;
+import model.AdminUser;
+import model.FacultyUser;
+import model.StudentUser;
+import model.User;
 
 public class LoginFrame extends JFrame implements ActionListener {
 
@@ -374,17 +378,10 @@ public class LoginFrame extends JFrame implements ActionListener {
 
                 if (rs.next()) {
 
-                    currentUserId =
-                            rs.getInt("user_id");
-
-                    currentUsername =
-                            rs.getString("username");
-
-                    currentRole =
-                            rs.getString("role");
-
-                    String status =
-                            rs.getString("status");
+                    int userId = rs.getInt("user_id");
+                    String authenticatedUsername = rs.getString("username");
+                    String authenticatedRole = rs.getString("role");
+                    String status = rs.getString("status");
 
                     if ("Pending".equalsIgnoreCase(status)) {
 
@@ -406,23 +403,50 @@ public class LoginFrame extends JFrame implements ActionListener {
                         return;
                     }
 
+                    User loggedInUser;
+
+                    if ("Faculty".equalsIgnoreCase(authenticatedRole)) {
+
+                        loggedInUser = new FacultyUser(userId, authenticatedUsername);
+
+                    } else if ("Admin".equalsIgnoreCase(authenticatedRole)) {
+
+                        loggedInUser = new AdminUser(userId, authenticatedUsername);
+
+                    } else if ("Student".equalsIgnoreCase(authenticatedRole)) {
+
+                        loggedInUser = new StudentUser(userId, authenticatedUsername);
+
+                    } else {
+
+                        JOptionPane.showMessageDialog(
+                                this,
+                                "Invalid account role."
+                        );
+
+                        return;
+                    }
+
+                    currentUserId = loggedInUser.getUserId();
+                    currentUsername = loggedInUser.getUsername();
+                    currentRole = loggedInUser.getRole();
+
                     JOptionPane.showMessageDialog(
                             this,
-                            currentRole
-                                    + " Login Successful!"
+                            currentRole + " Login Successful!"
                     );
 
                     dispose();
 
-                    if ("Faculty".equalsIgnoreCase(currentRole)) {
+                    if (loggedInUser instanceof FacultyUser) {
 
                         new FacultyFrame();
 
-                    } else if ("Admin".equalsIgnoreCase(currentRole)) {
+                    } else if (loggedInUser instanceof AdminUser) {
 
                         new AdminFrame();
 
-                    } else if ("Student".equalsIgnoreCase(currentRole)) {
+                    } else if (loggedInUser instanceof StudentUser) {
 
                         new StudentFrame();
                     }
