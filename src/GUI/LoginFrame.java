@@ -1,6 +1,7 @@
 package GUI;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -44,6 +45,7 @@ public class LoginFrame extends JFrame implements ActionListener {
         setSize(600, 450);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        getContentPane().setBackground(new Color(245, 247, 250));
 
         // Main window
         setLayout(new BorderLayout());
@@ -61,6 +63,7 @@ public class LoginFrame extends JFrame implements ActionListener {
         titleLabel.setFont(
                 new Font("Arial", Font.BOLD, 20)
         );
+        titleLabel.setForeground(new Color(35, 55, 80));
 
         JPanel titlePanel =
                 new JPanel(new BorderLayout());
@@ -75,6 +78,7 @@ public class LoginFrame extends JFrame implements ActionListener {
                 titleLabel,
                 BorderLayout.CENTER
         );
+        titlePanel.setOpaque(false);
 
         // ==========================================
         // LOGIN CARD
@@ -101,6 +105,7 @@ public class LoginFrame extends JFrame implements ActionListener {
                         )
                 )
         );
+        cardPanel.setBackground(Color.WHITE);
 
         // ==========================================
         // FORM
@@ -115,6 +120,7 @@ public class LoginFrame extends JFrame implements ActionListener {
                         javax.swing.BoxLayout.Y_AXIS
                 )
         );
+        formPanel.setOpaque(false);
 
         // Username row
         JPanel usernamePanel =
@@ -229,6 +235,9 @@ public class LoginFrame extends JFrame implements ActionListener {
         signUpButton.setPreferredSize(
                 new Dimension(110, 35)
         );
+        loginButton.setBackground(new Color(45, 91, 140));
+        loginButton.setForeground(Color.WHITE);
+        signUpButton.setBackground(new Color(230, 235, 241));
 
         loginButton.addActionListener(this);
         signUpButton.addActionListener(this);

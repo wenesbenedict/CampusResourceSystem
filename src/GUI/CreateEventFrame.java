@@ -2,6 +2,8 @@ package GUI;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
@@ -23,7 +25,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextArea;
@@ -31,7 +32,6 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -85,8 +85,6 @@ public class CreateEventFrame extends JFrame implements ActionListener {
     JButton submitButton;
     JButton backButton;
 
-    JProgressBar progressBar;
-
     HashMap<String, Integer> programmeMap;
     HashMap<String, Integer> sectionMap;
 
@@ -110,18 +108,21 @@ public class CreateEventFrame extends JFrame implements ActionListener {
         mainPanel.setBackground(new Color(245, 245, 245));
 
         JPanel formPanel = new JPanel(null);
-        formPanel.setPreferredSize(new java.awt.Dimension(650, 780));
+        formPanel.setPreferredSize(new Dimension(650, 760));
         formPanel.setBackground(Color.WHITE);
-        formPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        formPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(215, 220, 225)),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
         createForm(formPanel);
-        mainPanel.add(formPanel);
+        JScrollPane formScrollPane = new JScrollPane(formPanel);
+        formScrollPane.setBorder(BorderFactory.createEmptyBorder());
+        formScrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        mainPanel.add(formScrollPane);
         add(mainPanel, BorderLayout.CENTER);
 
         loadFacultyDepartment();
         loadProgrammes();
-        updateSmartUI();
-
         setVisible(true);
     }
 
@@ -133,6 +134,7 @@ public class CreateEventFrame extends JFrame implements ActionListener {
         titleLabel.setBounds(100, 15, 450, 30);
         titleLabel.setFont(new java.awt.Font(
                 "Arial", java.awt.Font.BOLD, 18));
+        titleLabel.setForeground(new Color(35, 55, 80));
 
         eventNameLabel = new JLabel("Event Name:");
         eventNameLabel.setBounds(35, 65, 130, 25);
@@ -141,6 +143,7 @@ public class CreateEventFrame extends JFrame implements ActionListener {
         eventNameField.setBounds(180, 65, 410, 28);
         eventNameField.setToolTipText(
                 "Enter the name of the academic event.");
+        styleInput(eventNameField);
 
         eventTypeLabel = new JLabel("Event Type:");
         eventTypeLabel.setBounds(35, 110, 130, 25);
@@ -155,6 +158,7 @@ public class CreateEventFrame extends JFrame implements ActionListener {
                 "Other"
         });
         eventTypeBox.setBounds(180, 110, 410, 28);
+        styleInput(eventTypeBox);
 
         levelLabel = new JLabel("Level:");
         levelLabel.setBounds(35, 155, 130, 25);
@@ -164,6 +168,7 @@ public class CreateEventFrame extends JFrame implements ActionListener {
                 "PG"
         });
         levelBox.setBounds(180, 155, 410, 28);
+        styleInput(levelBox);
         levelBox.addActionListener(this);
 
         departmentLabel = new JLabel("Department:");
@@ -174,6 +179,7 @@ public class CreateEventFrame extends JFrame implements ActionListener {
         departmentField.setEditable(false);
         departmentField.setToolTipText(
                 "Automatically taken from the logged-in faculty.");
+        styleInput(departmentField);
 
         programmeLabel = new JLabel("Programme:");
         programmeLabel.setBounds(35, 245, 130, 25);
@@ -183,6 +189,7 @@ public class CreateEventFrame extends JFrame implements ActionListener {
         programmeBox.addActionListener(this);
         programmeBox.setToolTipText(
                 "Programme available under the selected level.");
+        styleInput(programmeBox);
 
         yearLabel = new JLabel("Year:");
         yearLabel.setBounds(35, 290, 130, 25);
@@ -205,12 +212,6 @@ public class CreateEventFrame extends JFrame implements ActionListener {
         studentCountSpinner.setBounds(180, 380, 410, 28);
         studentCountSpinner.setToolTipText(
                 "Select the expected number of students.");
-        studentCountSpinner.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                updateSmartUI();
-            }
-        });
 
         dateLabel = new JLabel("Date:");
         dateLabel.setBounds(35, 425, 130, 25);
@@ -261,6 +262,7 @@ public class CreateEventFrame extends JFrame implements ActionListener {
                 "Laboratory"
         });
         resourceTypeBox.setBounds(180, 560, 410, 28);
+        styleInput(resourceTypeBox);
         resourceTypeBox.setToolTipText(
                 "Select the type of campus resource required.");
         resourceTypeBox.addActionListener(this);
@@ -302,19 +304,19 @@ public class CreateEventFrame extends JFrame implements ActionListener {
                     }
                 });
 
-        progressBar = new JProgressBar(0, 100);
-        progressBar.setBounds(180, 705, 410, 25);
-        progressBar.setStringPainted(true);
-
         submitButton = new JButton("Find & Request");
-        submitButton.setBounds(180, 745, 195, 35);
+        submitButton.setBounds(180, 705, 195, 35);
         submitButton.addActionListener(this);
         submitButton.setToolTipText(
                 "Find an available resource and send the request to admin.");
 
         backButton = new JButton("Back");
-        backButton.setBounds(395, 745, 195, 35);
+        backButton.setBounds(395, 705, 195, 35);
         backButton.addActionListener(this);
+        submitButton.setBackground(new Color(45, 91, 140));
+        submitButton.setForeground(Color.WHITE);
+        submitButton.setPreferredSize(new Dimension(195, 35));
+        backButton.setPreferredSize(new Dimension(195, 35));
 
         panel.add(titleLabel);
 
@@ -361,9 +363,12 @@ public class CreateEventFrame extends JFrame implements ActionListener {
         panel.add(commentScrollPane);
         panel.add(commentCountLabel);
 
-        panel.add(progressBar);
         panel.add(submitButton);
         panel.add(backButton);
+    }
+
+    private void styleInput(javax.swing.JComponent component) {
+        component.setFont(new Font("Arial", Font.PLAIN, 13));
     }
 
     private void updateCommentCount() {
@@ -580,7 +585,6 @@ public class CreateEventFrame extends JFrame implements ActionListener {
                     new SimpleDateFormat("dd/MM/yyyy");
 
             dateField.setText(sdf.format(pickedDate));
-            updateSmartUI();
         }
     }
 
@@ -597,7 +601,6 @@ public class CreateEventFrame extends JFrame implements ActionListener {
         if (dialog.getSelectedTime() != null) {
             selectedStartTime = dialog.getSelectedTime();
             startTimeField.setText(formatTime(selectedStartTime));
-            updateSmartUI();
         }
     }
 
@@ -624,66 +627,11 @@ public class CreateEventFrame extends JFrame implements ActionListener {
         if (dialog.getSelectedTime() != null) {
             selectedEndTime = dialog.getSelectedTime();
             endTimeField.setText(formatTime(selectedEndTime));
-            updateSmartUI();
         }
     }
 
     private String formatTime(java.sql.Time time) {
         return new SimpleDateFormat("hh:mm a").format(time);
-    }
-
-    public void updateSmartUI() {
-
-        int completed = 0;
-
-        if (!eventNameField.getText().trim().isEmpty()) {
-            completed++;
-        }
-
-        if (eventTypeBox.getSelectedItem() != null) {
-            completed++;
-        }
-
-        if (levelBox.getSelectedItem() != null) {
-            completed++;
-        }
-
-        if (!departmentField.getText().trim().isEmpty()) {
-            completed++;
-        }
-
-        if (programmeBox.getSelectedItem() != null) {
-            completed++;
-        }
-
-        if (yearBox.getSelectedItem() != null) {
-            completed++;
-        }
-
-        if (sectionBox.getSelectedItem() != null) {
-            completed++;
-        }
-
-        if (selectedEventDate != null) {
-            completed++;
-        }
-
-        if (selectedStartTime != null) {
-            completed++;
-        }
-
-        if (selectedEndTime != null) {
-            completed++;
-        }
-
-        if (resourceTypeBox.getSelectedItem() != null) {
-            completed++;
-        }
-
-        int percentage = (completed * 100) / 11;
-        progressBar.setValue(percentage);
-        progressBar.setString(
-                "Request Completion: " + percentage + "%");
     }
 
     @Override
@@ -715,7 +663,6 @@ public class CreateEventFrame extends JFrame implements ActionListener {
             new FacultyFrame();
         }
 
-        updateSmartUI();
     }
 
     public void createEventAndBooking() {
@@ -932,7 +879,6 @@ public class CreateEventFrame extends JFrame implements ActionListener {
 
         levelBox.setSelectedIndex(0);
         updateCommentCount();
-        updateSmartUI();
     }
 
     public static void main(String[] args) {

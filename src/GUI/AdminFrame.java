@@ -1,6 +1,7 @@
 package GUI;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -89,6 +90,7 @@ public class AdminFrame extends JFrame implements ActionListener {
                         10
                 )
         );
+        getContentPane().setBackground(new Color(245, 247, 250));
 
         createHeader();
 
@@ -124,6 +126,8 @@ public class AdminFrame extends JFrame implements ActionListener {
                         21
                 )
         );
+        titleLabel.setForeground(new Color(35, 55, 80));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 5, 15));
 
         headerPanel.add(
                 titleLabel,
@@ -139,6 +143,7 @@ public class AdminFrame extends JFrame implements ActionListener {
                                 10
                         )
                 );
+        summaryPanel.setBorder(BorderFactory.createEmptyBorder(8, 0, 4, 0));
 
         pendingBookingLabel =
                 new JLabel(
@@ -226,6 +231,8 @@ public class AdminFrame extends JFrame implements ActionListener {
 
         tabbedPane =
                 new JTabbedPane();
+        tabbedPane.setFont(new Font("Arial", Font.BOLD, 13));
+        tabbedPane.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
 
         createBookingTab();
         createBookingHistoryTab();
@@ -282,6 +289,7 @@ public class AdminFrame extends JFrame implements ActionListener {
                 new JTable(
                         bookingModel
                 );
+        styleTable(bookingTable);
 
         bookingTable.setSelectionMode(
                 ListSelectionModel.SINGLE_SELECTION
@@ -481,6 +489,7 @@ public class AdminFrame extends JFrame implements ActionListener {
                 new JTable(
                         facultyModel
                 );
+        styleTable(facultyTable);
 
         facultyTable.setSelectionMode(
                 ListSelectionModel.SINGLE_SELECTION
@@ -681,6 +690,7 @@ public class AdminFrame extends JFrame implements ActionListener {
                 new JTable(
                         resourceModel
                 );
+        styleTable(resourceTable);
 
         resourceTable.setRowHeight(
                 28
@@ -756,6 +766,7 @@ public class AdminFrame extends JFrame implements ActionListener {
         };
 
         bookingHistoryTable = new JTable(bookingHistoryModel);
+        styleTable(bookingHistoryTable);
         bookingHistoryTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         bookingHistoryTable.setRowHeight(28);
         bookingHistoryTable.setAutoCreateRowSorter(true);
@@ -817,6 +828,16 @@ public class AdminFrame extends JFrame implements ActionListener {
                 bottomPanel,
                 BorderLayout.SOUTH
         );
+    }
+
+    private void styleTable(JTable table) {
+        table.setRowHeight(28);
+        table.setFillsViewportHeight(true);
+        table.setShowGrid(true);
+        table.setGridColor(new Color(220, 225, 230));
+        table.setSelectionBackground(new Color(210, 225, 240));
+        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 13));
+        table.getTableHeader().setReorderingAllowed(false);
     }
 
     public void loadBookingRequests() {

@@ -1,6 +1,7 @@
 package GUI;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Insets;
@@ -50,6 +51,7 @@ public class StudentRequestsFrame extends JFrame implements ActionListener {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
+        getContentPane().setBackground(new Color(245, 247, 250));
 
         createHeader();
         createStudentTable();
@@ -69,6 +71,7 @@ public class StudentRequestsFrame extends JFrame implements ActionListener {
                 SwingConstants.CENTER
         );
         titleLabel.setFont(new Font("Arial", Font.BOLD, 21));
+        titleLabel.setForeground(new Color(35, 55, 80));
 
         countLabel = new JLabel(
                 "Pending Student Accounts: 0",
@@ -106,6 +109,11 @@ public class StudentRequestsFrame extends JFrame implements ActionListener {
 
         studentTable = new JTable(tableModel);
         studentTable.setRowHeight(28);
+        studentTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 13));
+        studentTable.getTableHeader().setReorderingAllowed(false);
+        studentTable.setShowGrid(true);
+        studentTable.setGridColor(new Color(220, 225, 230));
+        studentTable.setSelectionBackground(new Color(210, 225, 240));
         studentTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         studentTable.setAutoCreateRowSorter(true);
         studentTable.setToolTipText(
@@ -182,6 +190,14 @@ public class StudentRequestsFrame extends JFrame implements ActionListener {
 
         approveButton.setEnabled(false);
         rejectButton.setEnabled(false);
+        approveButton.setPreferredSize(new java.awt.Dimension(145, 34));
+        rejectButton.setPreferredSize(new java.awt.Dimension(135, 34));
+        refreshButton.setPreferredSize(new java.awt.Dimension(100, 34));
+        backButton.setPreferredSize(new java.awt.Dimension(90, 34));
+        approveButton.setBackground(new Color(45, 91, 140));
+        approveButton.setForeground(Color.WHITE);
+        rejectButton.setBackground(new Color(180, 70, 70));
+        rejectButton.setForeground(Color.WHITE);
 
         JPanel buttonPanel = new JPanel(
                 new FlowLayout(FlowLayout.CENTER, 12, 8)

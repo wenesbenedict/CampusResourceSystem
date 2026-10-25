@@ -1,6 +1,8 @@
 package GUI;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -132,6 +134,7 @@ public class SignUpFrame extends JFrame
                         20
                 )
         );
+        titleLabel.setForeground(new Color(35, 55, 80));
 
         mainPanel.add(
                 titleLabel,
@@ -142,6 +145,7 @@ public class SignUpFrame extends JFrame
                 new JPanel(
                         new GridBagLayout()
                 );
+        formPanel.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
 
         GridBagConstraints gbc =
                 new GridBagConstraints();
@@ -356,10 +360,11 @@ public class SignUpFrame extends JFrame
                 passwordField
         );
 
-        mainPanel.add(
-                formPanel,
-                BorderLayout.CENTER
-        );
+        javax.swing.JScrollPane formScrollPane =
+                new javax.swing.JScrollPane(formPanel);
+        formScrollPane.setBorder(BorderFactory.createTitledBorder("Account Information"));
+        formScrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        mainPanel.add(formScrollPane, BorderLayout.CENTER);
 
         JPanel buttonPanel =
                 new JPanel();
@@ -377,6 +382,11 @@ public class SignUpFrame extends JFrame
         signUpButton.addActionListener(this);
 
         backButton.addActionListener(this);
+        signUpButton.setPreferredSize(new Dimension(145, 34));
+        backButton.setPreferredSize(new Dimension(100, 34));
+        signUpButton.setBackground(new Color(45, 91, 140));
+        signUpButton.setForeground(Color.WHITE);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(4, 0, 2, 0));
 
         buttonPanel.add(
                 signUpButton

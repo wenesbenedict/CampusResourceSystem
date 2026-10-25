@@ -1,6 +1,7 @@
 package GUI;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -50,6 +51,7 @@ public class MyRequestsFrame extends JFrame
         setTitle(
                 "My Resource Requests - Karunya Campus Allocation & Booking System"
         );
+        getContentPane().setBackground(new Color(245, 247, 250));
 
         setSize(1000, 700);
 
@@ -84,6 +86,7 @@ public class MyRequestsFrame extends JFrame
                         20
                 )
         );
+        titleLabel.setForeground(new Color(35, 55, 80));
 
         topPanel.add(
                 titleLabel,
@@ -94,6 +97,9 @@ public class MyRequestsFrame extends JFrame
                 new JButton("Refresh");
 
         refreshButton.addActionListener(this);
+        refreshButton.setPreferredSize(new Dimension(100, 34));
+        refreshButton.setBackground(new Color(45, 91, 140));
+        refreshButton.setForeground(Color.WHITE);
 
         JPanel refreshPanel =
                 new JPanel(
@@ -154,6 +160,12 @@ public class MyRequestsFrame extends JFrame
         requestsTable.setRowHeight(
                 28
         );
+        requestsTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 13));
+        requestsTable.getTableHeader().setReorderingAllowed(false);
+        requestsTable.setShowGrid(true);
+        requestsTable.setGridColor(new Color(220, 225, 230));
+        requestsTable.setSelectionBackground(new Color(210, 225, 240));
+        requestsTable.setFillsViewportHeight(true);
 
         requestsTable.setAutoCreateRowSorter(
                 true
@@ -294,6 +306,7 @@ public class MyRequestsFrame extends JFrame
                 new JButton("Back");
 
         backButton.addActionListener(this);
+        backButton.setPreferredSize(new Dimension(90, 34));
 
         JPanel bottomPanel =
                 new JPanel(

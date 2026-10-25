@@ -1,6 +1,7 @@
 package GUI;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -50,6 +51,7 @@ public class StudentFrame extends JFrame implements ActionListener {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
+        getContentPane().setBackground(new Color(245, 247, 250));
 
         createHeader();
         createEventTable();
@@ -71,6 +73,7 @@ public class StudentFrame extends JFrame implements ActionListener {
                 SwingConstants.CENTER
         );
         titleLabel.setFont(new Font("Arial", Font.BOLD, 21));
+        titleLabel.setForeground(new Color(35, 55, 80));
 
         academicLabel = new JLabel(
                 "Loading academic details...",
@@ -114,6 +117,12 @@ public class StudentFrame extends JFrame implements ActionListener {
 
         eventsTable = new JTable(tableModel);
         eventsTable.setRowHeight(30);
+        eventsTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 13));
+        eventsTable.getTableHeader().setReorderingAllowed(false);
+        eventsTable.setShowGrid(true);
+        eventsTable.setGridColor(new Color(220, 225, 230));
+        eventsTable.setSelectionBackground(new Color(210, 225, 240));
+        eventsTable.setFillsViewportHeight(true);
         eventsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         eventsTable.setAutoCreateRowSorter(true);
         eventsTable.setToolTipText(
@@ -186,6 +195,10 @@ public class StudentFrame extends JFrame implements ActionListener {
         JPanel footerPanel = new JPanel(
                 new FlowLayout(FlowLayout.CENTER, 15, 8)
         );
+        refreshButton.setPreferredSize(new Dimension(130, 34));
+        logoutButton.setPreferredSize(new Dimension(100, 34));
+        refreshButton.setBackground(new Color(45, 91, 140));
+        refreshButton.setForeground(Color.WHITE);
         footerPanel.add(refreshButton);
         footerPanel.add(logoutButton);
 
